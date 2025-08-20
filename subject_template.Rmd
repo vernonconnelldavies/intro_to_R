@@ -1,0 +1,93 @@
+---
+title: "subject_template"
+author: "Vernon Davies"
+date: "2024-11-29"
+params:
+  data_for_markdown: NULL
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,eval = TRUE, message = FALSE,
+                      warning = FALSE, comment = NA)
+
+```
+
+
+
+```{r, echo=FALSE}
+
+library(tidyverse)
+ggplot(params$data_for_markdown,aes(x=marks))+geom_histogram(colour = 'black', fill = 'lightblue')+ggtitle(params$data_for_markdown$subject)#I successfully added a title to the report using ggtitle which was a Google suggestion, the code inside the bracket was simlply trial and error
+```
+
+
+Here is a snapshot of the score results table
+
+
+```{r, echo=FALSE}
+params$data_for_markdown
+```
+
+
+Here is the mean 
+```{r, echo=FALSE}
+mean(params$data_for_markdown$marks)
+```
+Here is the median
+```{r, echo=FALSE}
+median(params$data_for_markdown$marks)
+```
+Here is the top mark
+```{r, echo=FALSE}
+max(params$data_for_markdown$marks)
+```
+Here is the lowest mark
+```{r, echo=FALSE}
+min(params$data_for_markdown$marks)
+```
+We will define (in accordance with the Scottish Higher system) 50% or above being the pass rate. Here is a snapshot of our data.
+```{r, echo=FALSE}
+data_with_pass<-mutate(params$data_for_markdown, pass_or_fail=case_when(marks>=50 ~'PASS',marks<50~'FAIL'))#the following code I modified (with trial and error) from a Stack Overflow thread
+#https://stackoverflow.com/questions/73884969/create-new-column-with-if-else-in-r
+data_with_pass
+ggplot(data_with_pass,aes(x=pass_or_fail))+geom_bar(colour = 'black', fill = 'lightgreen')
+```
+
+
+We will define an 'A' grade as 70% or above, 'B' as 60% or above and 'C' as 50% or above, 'D' being 40% or above, and 'NO GRADE' being anything lower than a 'D', it should be noted that a 'D' grade is also included in the 'FAIL' category overall as it is lower than 50%
+
+```{r, echo=FALSE}
+data_with_grade<-mutate(params$data_for_markdown, grade=case_when(marks>=70 ~'A',marks>=60&marks<70~'B',marks>=50&marks<60~'C',marks>=40&marks<50~'D',marks<40~'NO GRADE'))
+data_with_grade
+ggplot(data_with_grade,aes(x=grade))+geom_bar(colour = 'black', fill = 'lightgreen')
+```
+
+Here is a boxplot of the results
+
+```{r, echo=FALSE}
+ggplot(params$data_for_markdown,aes(x=student_number,y=marks))+geom_boxplot()
+```
+
+The pass rate (%) is:
+
+```{r, echo=FALSE}
+data_with_pass_2nd<-mutate(params$data_for_markdown, pass_or_fail=case_when(marks>=50 ~'PASS',marks<50~'FAIL'))#I named it data_with_pass_2nd so R didn't get confused with data_with_pass
+pass_tibble<-count(data_with_pass_2nd, pass_or_fail)
+pass_rate<-pass_tibble[2,2]*(1/200)*100#here I used the square bracket idea from  a stack over flow thread
+#https://stackoverflow.com/questions/34696951/how-to-get-the-nth-row-from-data-frame-in-r
+pass_rate
+```
+
+Here is a pie chart of grades for this subject:
+
+```{r, echo=FALSE}
+data_with_grade_2nd<-mutate(params$data_for_markdown, grade=case_when(marks>=70 ~'A',marks>=60&marks<70~'B',marks>=50&marks<60~'C',marks>=40&marks<50~'D',marks<40~'NO GRADE'))
+grade_count<-count(data_with_grade_2nd,grade)#I named is data_with_grade_2nd not to confuse it with the first
+pie(grade_count$n,grade_count$grade, main="Pie Chart of Grades")
+#I worked out how to do this code bit using the following source
+#https://www.datacamp.com/doc/r/pie
+```
+
+
+
